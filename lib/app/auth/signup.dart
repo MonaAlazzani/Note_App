@@ -20,7 +20,9 @@ class _SignupState extends State<Signup> {
   Crud _crud = Crud();
 
   signup()async{
-    isLoading = true;
+    var currentState = formstate.currentState;
+    if(currentState!.validate()){
+      isLoading = true;
     setState(() {});
 
   var response =  await _crud.postRequest(signupLink, {
@@ -28,7 +30,7 @@ class _SignupState extends State<Signup> {
       'email': email.text,
       'password': password.text
     });
-    
+
     isLoading = false;
     setState(() {});
 
@@ -37,6 +39,7 @@ class _SignupState extends State<Signup> {
   }else{
     print('=========Signup Fail========');
   }
+    }
   }
 
 
@@ -53,9 +56,21 @@ class _SignupState extends State<Signup> {
             key:formstate,
             child: Column(
               children: [
-                CustomTextFormSign(hint: 'Username', controller: username,),
-                CustomTextFormSign(hint: 'Email', controller: email,),
-                CustomTextFormSign(hint: 'Password', controller: password,),
+                CustomTextFormSign(hint: 'Username', controller: username,validator:(val){
+                  if (val!.isEmpty){
+                    return 'This field should not be empty';
+                  }
+                } ),
+                CustomTextFormSign(hint: 'Email', controller: email,validator:(val){
+                  if (val!.length < 10){
+                    return 'This field should not be less than 10';
+                  }
+                } ),
+                CustomTextFormSign(hint: 'Password', controller: password,validator:(val){
+                  if (val!.length < 5){
+                    return 'This field should not be less than 5';
+                  }
+                } ),
                  SizedBox(height: 20,),
                 MaterialButton(onPressed: ()async{
                  

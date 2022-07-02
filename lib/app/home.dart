@@ -1,5 +1,10 @@
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:note_app/components/curd.dart';
+import 'package:note_app/constants/api_link.dart';
+import 'package:note_app/main.dart';
+import 'package:note_app/view/note_card.dart';
 
 class Home extends StatefulWidget {
   const Home({ Key? key }) : super(key: key);
@@ -8,42 +13,65 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with Crud{
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Home'),),
-      floatingActionButton: FloatingActionButton(onPressed: () {},child: Icon(Icons.add),),
+      appBar: AppBar(title: Text('Home'),
+      actions: [
+        IconButton(onPressed: (){
+          sharedPref.clear();
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        }, icon: Icon(Icons.exit_to_app))
+      ],
+      ),
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        Navigator.of(context).pushReplacementNamed('add_note');
+      },child: Icon(Icons.add),),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
         child: ListView(
           children: [
-            InkWell(
-              onTap: (){},
-              child: Card(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Image.network('https://images.unsplash.com/photo-1526662092594-e98c1e356d6a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTR8fGtpZHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=600&q=60'
-                    ,width:80,height: 80, fit: BoxFit.fill,)),
+           FutureBuilder(
+          future: viewNote(),
+          builder: (BuildContext context, AsyncSnapshot snapshot){
+           
+            if(snapshot.hasData){
+               if(snapshot.data['status'] == 'Fail') 
+                    return Center(child: Text('No notes found'));
+             return ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: snapshot.data['data'].length,
+              itemBuilder: (content, index){
+                return NoteCard(
+                onTap: (){}, 
+                content: '${snapshot.data['data'][index]['note_content']}',
+                 title: '${snapshot.data['data'][index]['note_title']}');
+              }
+              
+              );
 
-                    Expanded(
-                      flex: 2,
-                      child: ListTile(
-                      title: Text('Title'),
-                      subtitle: Text('Note Content'),
-                    ))
-
-                  ],
-                ),
-              ),
-            )
+            }  if( snapshot.connectionState == ConnectionState.waiting){
+              Center(child: CircularProgressIndicator(),);
+            }
+            return Center(child: CircularProgressIndicator(),);
+           })
           ],
         ),
       ),
     );
   }
+
+ 
+
+Future viewNote()async{
+  var response = await postRequest(view_ApiLink, {
+    'id': sharedPref.getString('id')
+  });
+
+  return response;
+ }
+
 }
