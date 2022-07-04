@@ -1,7 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:note_app/app/notes/edit.dart';
 import 'package:note_app/components/curd.dart';
+import 'package:note_app/components/note_model.dart';
 import 'package:note_app/constants/api_link.dart';
 import 'package:note_app/main.dart';
 import 'package:note_app/view/note_card.dart';
@@ -46,9 +48,19 @@ class _HomeState extends State<Home> with Crud{
               itemCount: snapshot.data['data'].length,
               itemBuilder: (content, index){
                 return NoteCard(
-                onTap: (){}, 
-                content: '${snapshot.data['data'][index]['note_content']}',
-                 title: '${snapshot.data['data'][index]['note_title']}');
+                onTap:  (){
+                Navigator.of(context).push(MaterialPageRoute(builder: (context)
+                 => EditNote(note: snapshot.data['data'][index])));
+              }, 
+                note: NoteModel.fromJson(snapshot.data['data'][index]),
+                 onDelete: ()async{
+                  await deleteNote(snapshot.data['data'][index]['note_id']);
+                  setState(() {
+                    
+                  });
+                 },
+                 
+                 );
               }
               
               );
@@ -73,5 +85,12 @@ Future viewNote()async{
 
   return response;
  }
+
+  deleteNote(id) async{
+    var response = await postRequest(delete_ApiLink, {
+      "id": id.toString()
+    });
+    return response;
+  }
 
 }

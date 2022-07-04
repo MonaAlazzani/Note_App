@@ -5,7 +5,8 @@ import 'package:note_app/constants/api_link.dart';
 import 'package:note_app/main.dart';
 
 class EditNote extends StatefulWidget {
-  const EditNote({Key? key}) : super(key: key);
+  var note;
+   EditNote({Key? key, required this.note}) : super(key: key);
 
   @override
   State<EditNote> createState() => _EditNoteState();
@@ -15,6 +16,14 @@ class _EditNoteState extends State<EditNote> with Crud {
   TextEditingController title = TextEditingController();
   TextEditingController content = TextEditingController();
  GlobalKey<FormState> formState = GlobalKey();
+
+ @override
+  void initState() {
+    title.text = widget.note['note_title'];
+     content.text = widget.note['note_content'];
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +58,7 @@ class _EditNoteState extends State<EditNote> with Crud {
                       MaterialButton(onPressed: ()async{
                         await EditNote();
                       }, color: Colors.blue,
-                       child: Text('ADD', style: TextStyle(color: Colors.white),),)
+                       child: Text('Save', style: TextStyle(color: Colors.white),),)
                 ],
               ))
             ],
@@ -62,8 +71,8 @@ class _EditNoteState extends State<EditNote> with Crud {
 
     if(currentState!.validate()){
       
-      var response = await postRequest(add_ApiLink, {
-      "id": sharedPref.getString('id'),
+      var response = await postRequest(edit_ApiLink, {
+      "id": widget.note['note_id'].toString(),
       "title": title.text,
       "content": content.text
     });

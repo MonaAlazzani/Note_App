@@ -1,17 +1,18 @@
 
 import 'package:flutter/material.dart';
+import 'package:note_app/app/notes/edit.dart';
+import 'package:note_app/components/note_model.dart';
 
 class NoteCard extends StatelessWidget {
   void Function() onTap;
-  String title, content;
-   NoteCard({ Key? key, required this.onTap , required this.content, required this.title}) : super(key: key);
+   void Function() onDelete;
+  final NoteModel note;
+   NoteCard({ Key? key, required this.onTap , required this.note, required this.onDelete}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-              onTap: (){
-                Navigator.of(context).pushNamed('edit_note');
-              },
+              onTap: onTap,
               child: Card(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -25,8 +26,11 @@ class NoteCard extends StatelessWidget {
                     Expanded(
                       flex: 2,
                       child: ListTile(
-                      title: Text('$title'),
-                      subtitle: Text('$content'),
+                      title: Text('${note.noteTitle}'),
+                      subtitle: Text('${note.noteContent}'),
+                      trailing: InkWell(
+                        onTap: onDelete,
+                        child: Icon(Icons.delete)),
                     ))
 
                   ],
